@@ -1,0 +1,94 @@
+Java nio --> 	new I/O model based on Buffers, Channels, and Selectors
+		enables non-blocking I/O ==> improve perforamnce
+
+Packages -->	java.nio.*
+		java.nio.channels.*
+
+**BUFFERS    --> Data containers used by Channels (there is no byte-based data in NIO)
+		 Features:
+			1) Capacity --> how many elements can be stored in the buffer (cannot be changed after buffer creation)
+			2) Limit --> the index of the first element that shoud not be read or written (limit <= capacity)
+			3) Position --> the index of the next element to be read or written
+			4) Mark --> after calling RESET method ==> position = mark   
+		 Methods:
+			1) allocateDirect(int capacity) --> allocate new direct byte buffer (operation on the buffer directly - avoid copying the buffer)
+				for large and long lived buffers
+			2) allocate(int capacity); --> allocate new buffer (copy buffer into JVM)
+				direct buffer is faster but consumes more time to be created (create time vs. how many time to access)
+			3) wrap(byte[] b); --> create a buffer for existing array (capacity = b.length) 		
+			4) clear(); --> clear the buffer for writing (position = 0 & limit = capacity)
+				we have read all data from or have written all data into buffer ==> clear();  
+			5) flip(); --> prepare buffer for reading after channel wrote into it ( 1)limit=postion 2)position=0 )
+			6) get()
+				a) get(); --> read one byte at current postion and the position++
+				b) get(int index); --> read the byte at given index
+				c) get(byte[] dst); --> transfer byte buffer to the destination array
+			7) put	
+				a) put(byte b) --> write b at the current position
+				b)
+				c)	
+			8) hasRemaining(); --> check: is there any elements between position and limit??? 
+			9) rewind(); --> RESET the position ==> position = 0 (re-reading)
+			10) mark(); --> mark = postion
+			11) reset(); --> position = mark
+			
+			**for writing into buffer ==> wrap(byte[] b) or allocate(b.length) --> put(b[i]) using LOOP
+			**for reading from buffer ==> flip() then call get() using LOOP
+			**ByteBuffer buffer1 = allocate(8192); or allocate(b.length); ==> buffer1.get(); or buffer1.flip();
+		 	**CharBuffer buffer2 = CharBuffer.wrap(SOME_STRING);
+		 
+
+**CHANNELS   --> Connections to I/O sources (passes data) 
+		 operates with buffers and I/O sources --> transfer data blocks from buffer to I/O source (vice versa)
+		 can be blocking or non-blocking
+		 TCP Connection:
+			1) SocketChannel (connects to communicating socket)
+				SocketChannel channel = SocketChannel.open();	//creates
+				channel.configureBlocking(false);		//it is nonBlocking
+				channel.connect(InetSocketAddress obj);
+				channel.write(ByteBuffer b) --> writes buffer b into channel 
+			2) ServerSocketChannel (connects to listening socket)
+				ServerSocketChannel channel = ServerSocketChannel.open();
+				ServerSocket socket = channel.socket();
+				socket.bind(new InetSocketAddress(port))
+				
+		 **int i = channel.read(buffer);	==> read from channel such as SocketChannel into buffer
+		 **buffer.flip(); --> while(buffer.hasRemaining()){ channel.write(buffer); }	==> write from buffer into channel
+
+
+**SELECTORS  --> Enables non-blocking I/o
+		 PLUS: Selection Keys + Selectable Channels (SocketChannel&ServerSocketChannel)
+		 Query selector to find out which channel is ready to perform non-blocking I/O immediately
+		 Selects channels ready to comunicate
+		 Network Operation --> connect, accept, read, write
+		 Selection Key --> representing channel registration with a selector
+		 USE:
+			1) Selector selector = Selector.open();
+			2) ServerSocketChannel serverChannel = ServerSocketChannel.open();
+			   ServerSocket serverSocket = serverChannel.socket();
+			   serverSocket.bind(new InetSocketAddress(port));
+			   serverChannel.configureBlocking(false);
+			   serverChannel.register(selector, SelectionKey.OP_ACCEPT);
+			3) in while(true)loop
+			   selector.select();
+			   Iterator <SelectionKeys> keySet = selector.selectedKeys().iterator();
+		 METHODS:
+			1) select() --> return set of keys whose channels are ready for I/O
+			2) selectedKeys() --> return selected-key set
+			3) Iterater over the selected-key set
+
+		 ** 1) SelectionKey clientKey = socketChannel.register(selector, SelectionKey.OP_READ);
+		 ** 2) ByteBuffer buffer = ByteBuffer.allocate(1024);
+		 ** 3) clientKey.attach(buffer);
+		 ** 4) SocketChannel sockChannnel = (SocketChannel) clientKey.channel();
+		 ** 5) ByteBuffer buffy = (ByteBuffer) clientKey.attachment;
+				
+
+
+
+
+
+
+all socket connection in one thread.... but handling in threadpool
+1) selector selects read() --> read pass data to handle in new thread
+how many threads: 1 man thread + threads in the pool (no need for one thread per client)

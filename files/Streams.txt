@@ -1,0 +1,73 @@
+WRITE CONTENT
+
+int i = Integer.parseInt(str);
+
+
+write(String path, String content)
+//look at path extension, what is it?
+//if it is .txt ==> call writeTxt 
+//else if it is .txt ==> call writeHex 
+
+
+TEXT:
+PrintWriter wr = new PrintWriter(new BufferedWriter (new FileWriter(filePathInString, true)));
+
+**true parameter ==> data will be appanded
+**FileWriter --> stream connected to the file
+**BufferedWrited --> send more than one character at the time
+**PrintWriter --> enter data using println();
+
+HEX:
+**OutputStream to write bytes	  
+DataOutputStream wr = new DataOutputStream(new BufferedOutputStream(new FileOutputStream(filePathInString, true)));
+for (String hexVal : content.split(" ")))
+
+**DataOutputStream -->	using writeInt(Integer.parseInt(String, int));
+			**writeBoolean, writeBytes (primitive data)
+**str.split(" ") --> will return am array
+
+OBJ:
+**Remember: serialilzed objects are an array list
+
+String[] elements = content.split(" ");
+List<String> contentAsList = Arrays.asList(elements);
+
+***************************************************************************************************
+
+READ CONTENT
+
+read(String path)
+
+//1) what is the file extention???
+//2) if it is text ==> readText(){...} and so on...
+
+Text:
+BufferedReader fromFile = new BufferedReader (new FileReader(path));
+
+Hex:
+DataInputStream fromFile = new DataInputStream (new BufferedInputStream (new FileInputStream(path));
+
+Object:
+ObjectInputStream fromFile = new ObjectInputStream (new BufferedInputStream (new FileInputStream(path));
+StringBuilder content = new StringBuilder();
+List<String> contentAsList = (List<String>)fromFile.readObject();
+
+**ObjectInputStream --> provide readObject();
+**contentAsList --> list of string elements
+	contentAsList.stream() is used to produce stream!!!
+
+**	contentAsList.stream().forEachOrdered(line -> appendElement(content,line));
+	for(String str : contentAsList){
+		appendElement(content,str);
+	}	
+
+
+
+
+
+
+
+
+
+
+

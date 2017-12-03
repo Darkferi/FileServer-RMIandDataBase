@@ -1,0 +1,36 @@
+RMI ==> we don't have to care about communication (Network packages)
+RMI call similar to Local call
+
+Put interface in package named "Common"
+
+**First thing to create Java RMI program is to decide which methods are going to be called remotely. Then create an interface that defines those methods.
+	public interface IfName extends Remote
+		Client calls from Server:
+			1) register(remoteObj of Client, Credentials credentials)
+			2) login(remoteObj of Client, Credentials credentials)
+			3) logout(int id)
+		Server calls from Client:
+			1) receiveMessage(String dataFromServer)
+
+**Second thing is to export object that can be called remotely
+	public class XXX extends UnicastRemoteObject implements itsInterfaceInCommon
+		*export operation is performed in constructor of UnicastRemoteObject ==> we must not have constructor in XXX
+
+
+1) Define remote methods in an interface extending java.rmi.Remote (all of them throw RemoteException)
+2) Implement remote methods in a class extending UnicastRemoteObject
+**RemoteException is thrown in the framework normally
+
+REGISTRY in Java RMI
+	How to start --> done in Main at the server side
+		*Callee is Caller of Registry
+		*build Registry in server side 
+			1) startRegistry
+			2) bind the server to Registry using Naming class
+		*write lookup method in client side using Naming class
+
+Call by value		the oject passed to server will be copied at server side 
+			*appropriate when object only contains data (only purpose is to pass the data)
+			*Class of these objects needs to implement java.io.Serializable   
+Call by reference 	Reference to the specific object will be passed
+			*object of remote interface of Client 
